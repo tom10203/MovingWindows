@@ -44,8 +44,9 @@ public class PlayerCharacter : MonoBehaviour
 
         playerCollisions.Reset();
 
-        CheckCollisionsVertical(ref velocity);
         CheckCollisionsHorizontal(ref velocity);
+        CheckCollisionsVertical(ref velocity);
+        
 
 
 
@@ -72,8 +73,6 @@ public class PlayerCharacter : MonoBehaviour
 
         Vector3 startPos = direction < 0 ? playerBounds.bottomLeft : playerBounds.topLeft;
 
-        bool collisionHit = false;
-
         for (int i = 0; i < raysVertical; i++)
         {
             Vector3 rayStart = startPos + transform.right * horizontalRaySpacing * i;
@@ -84,19 +83,25 @@ public class PlayerCharacter : MonoBehaviour
 
             if (hit)
             {
-                collisionHit = true;
+                float horizontalVel = Mathf.Abs(velocity.x);
+
+                float angle = Vector2.Angle(hit.normal, Vector2.up);
+
+                if (i == 0 || i == raysVertical - 1)
+                {
+                    velocity.x = Mathf.Cos(angle * Mathf.Deg2Rad) * velocity.x;
+                    velocity.y =  Mathf.Sin(angle * Mathf.Deg2Rad) * velocity.x;
+                }
+
                 rayDist = hit.distance;
 
+                velocity.y = (rayDist - skinWidth) * direction;
                 playerCollisions.above = direction == 1;
                 playerCollisions.below = direction == -1;
             }
 
         }
 
-        if (collisionHit)
-        {
-            velocity.y = (rayDist - skinWidth)  * direction;
-        }
     }
 
     void CheckCollisionsHorizontal(ref Vector3 velocity)
@@ -106,7 +111,6 @@ public class PlayerCharacter : MonoBehaviour
 
         Vector3 startPos = direction < 0 ? playerBounds.bottomLeft : playerBounds.bottomRight;
 
-        bool collisionHit = false;
 
         for (int i = 0; i < raysHorizontal; i++)
         {
@@ -123,16 +127,24 @@ public class PlayerCharacter : MonoBehaviour
 
                 if (i == 0 && angle < maxClimbAngle)
                 {
+                    float storedVelocity = Mathf.Abs(velocity.y);
+                    float slopeVelocity  = Mathf.Abs(velocity.x) * Mathf.Sin(angle * Mathf.Deg2Rad);
+
+                    if (storedVelocity > slopeVelocity)
+                    {
+                        velocity.y  = storedVelocity;
+                    }
+                    else
+                    {
+                        velocity.y = slopeVelocity;
+                        playerCollisions.below = true;
+                    }
                     velocity.x = Mathf.Abs(velocity.x) * Mathf.Cos(angle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
-                    velocity.y = Mathf.Abs(velocity.x) * Mathf.Sin(angle * Mathf.Deg2Rad);
-
-                    playerCollisions.below = true;
                     return;
-
                 }
 
-                collisionHit = true;
                 rayDist = hit.distance;
+                velocity.x = (rayDist - skinWidth) * direction;
 
                 playerCollisions.left = direction == -1;
                 playerCollisions.right = direction == 1;
@@ -140,9 +152,8 @@ public class PlayerCharacter : MonoBehaviour
             }
         }
 
-        if (collisionHit)
-        {
-            velocity.x = (rayDist - skinWidth) * direction;
-        }
+  
+            
+     
     }
 }

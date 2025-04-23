@@ -23,6 +23,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float horizontalAcceleration = 0.5f;
     [SerializeField] private float horizontalAccelerationAir = 0.5f;
     [SerializeField] private float horizontalDeceleration = 100f;
+    [SerializeField] private float coyoteTime = 0.1f;
     private float horizontalSpeedCurrent = 0f;
 
     private Vector2 velocity;
@@ -31,6 +32,9 @@ public class Player : MonoBehaviour
     
 
     PlayerCharacter _character;
+
+    float timeSinceHorizontalInputPressed;
+    float storedVelocity;
     void Start()
     {
         _character = GetComponent<PlayerCharacter>();
@@ -46,37 +50,53 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        //if (_character.playerCollisions.below || _character.playerCollisions.above)
+        //{
+        //    velocity.y = -0.05f;
+        //}
 
         velocity += Vector2.up * gravity * Time.deltaTime;
 
         Vector2 move = _move.ReadValue<Vector2>();
         float xMovement = move.x;
-        Debug.Log($"xMovement {xMovement}");
         HandleHorizontalInput(ref velocity, xMovement);
 
         bool jump = _jump.WasPerformedThisFrame();
         if (jump && _character.playerCollisions.below)
         {
+            Debug.Log($"Jump pressed AND ground below");
             velocity.y = jumpVelocity;
         }
-
+   
         _character.Move(velocity * Time.deltaTime);
+
+        if (_character.playerCollisions.below || _character.playerCollisions.above)
+        {
+            velocity.y = 0f;
+        }
     }
 
     void HandleHorizontalInput(ref Vector2 velocity, float input)
     {
+        float acceleration = _character.playerCollisions.below
+            ? horizontalAcceleration
+            : horizontalAcceleration * horizontalAccelerationAir;
+
         if (input != 0)
         {
-            // Move absolute velocity towards target velocity
-            // Have velocity move in direction of input
-            float tempVel = Mathf.Abs(velocity.x);
-            tempVel = Mathf.MoveTowards(tempVel, horizontalMovementSpeed, (_character.playerCollisions.below ? horizontalAcceleration : horizontalAcceleration * horizontalAccelerationAir) * Time.deltaTime);
-            velocity.x = tempVel * input;
+            float currentSpeed = timeSinceHorizontalInputPressed < 0.1f
+                ? storedVelocity
+                : Mathf.Abs(velocity.x);
 
+            currentSpeed = Mathf.MoveTowards(currentSpeed, horizontalMovementSpeed, acceleration * Time.deltaTime);
+            velocity.x = currentSpeed * input;
+            storedVelocity = Mathf.Abs(velocity.x);
+            timeSinceHorizontalInputPressed = 0f;
         }
         else
         {
-            velocity.x = Mathf.MoveTowards(velocity.x, input * horizontalMovementSpeed, horizontalDeceleration * Time.deltaTime);
+            timeSinceHorizontalInputPressed += Time.deltaTime;
+            velocity.x = Mathf.MoveTowards(velocity.x, 0f, horizontalDeceleration * Time.deltaTime);
         }
     }
 }
