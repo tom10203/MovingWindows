@@ -46,20 +46,12 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (_character.playerCollisions.above || _character.playerCollisions.below)
-        {
-            velocity.y = 0f;   
-        }
-        if (_character.playerCollisions.left || _character.playerCollisions.right)
-        {
-            Debug.Log($"Velocity x set to 0");
-            velocity.x = 0f;
-        }
 
         velocity += Vector2.up * gravity * Time.deltaTime;
 
         Vector2 move = _move.ReadValue<Vector2>();
         float xMovement = move.x;
+        Debug.Log($"xMovement {xMovement}");
         HandleHorizontalInput(ref velocity, xMovement);
 
         bool jump = _jump.WasPerformedThisFrame();
@@ -75,7 +67,12 @@ public class Player : MonoBehaviour
     {
         if (input != 0)
         {
-            velocity.x = Mathf.MoveTowards(velocity.x, input * horizontalMovementSpeed, (_character.playerCollisions.below ? horizontalAcceleration : horizontalAcceleration * horizontalAccelerationAir) * Time.deltaTime);
+            // Move absolute velocity towards target velocity
+            // Have velocity move in direction of input
+            float tempVel = Mathf.Abs(velocity.x);
+            tempVel = Mathf.MoveTowards(tempVel, horizontalMovementSpeed, (_character.playerCollisions.below ? horizontalAcceleration : horizontalAcceleration * horizontalAccelerationAir) * Time.deltaTime);
+            velocity.x = tempVel * input;
+
         }
         else
         {

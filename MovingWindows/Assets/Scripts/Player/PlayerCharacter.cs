@@ -59,7 +59,7 @@ public class PlayerCharacter : MonoBehaviour
         playerBounds.bottomLeft  = new Vector2(boxColliderBounds.min.x, boxColliderBounds.min.y);
         playerBounds.bottomRight = new Vector2(boxColliderBounds.max.x, boxColliderBounds.min.y);
         playerBounds.topLeft     = new Vector2(boxColliderBounds.min.x, boxColliderBounds.max.y);
-        playerBounds.topLeft     = new Vector2(boxColliderBounds.max.x, boxColliderBounds.max.y);
+        playerBounds.topRight     = new Vector2(boxColliderBounds.max.x, boxColliderBounds.max.y);
 
         horizontalRaySpacing = boxColliderBounds.size.x / (raysHorizontal - 1);
         verticalRaySpacing   = boxColliderBounds.size.y / (raysVertical   - 1);   
@@ -119,7 +119,6 @@ public class PlayerCharacter : MonoBehaviour
             
             if (hit)
             {
-                Debug.Log($"Ground collision hit");
                 float angle = Vector2.Angle(Vector2.up, hit.normal);
 
                 if (i == 0 && angle < maxClimbAngle)
@@ -132,14 +131,12 @@ public class PlayerCharacter : MonoBehaviour
 
                 }
 
-                if (hit.normal != Vector2.right && hit.normal != Vector2.left)
-                {
-                    collisionHit = true;
-                    rayDist = hit.distance;
+                collisionHit = true;
+                rayDist = hit.distance;
 
-                    playerCollisions.left = direction == -1;
-                    playerCollisions.right = direction == 1;
-                }
+                playerCollisions.left = direction == -1;
+                playerCollisions.right = direction == 1;
+                
             }
         }
 
