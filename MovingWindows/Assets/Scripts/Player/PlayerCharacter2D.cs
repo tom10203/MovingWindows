@@ -115,6 +115,7 @@ public class PlayerCharacter2D : MonoBehaviour
 
             if (hit)
             {
+                Debug.Log($"Vertical collision with {hit.collider.name}");  
                 velocity.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;
 
