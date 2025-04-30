@@ -6402,8 +6402,6 @@ GameObject:
   - component: {fileID: 1418748850}
   - component: {fileID: 1418748849}
   - component: {fileID: 1418748848}
-  - component: {fileID: 1418748851}
-  - component: {fileID: 1418748852}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -6458,6 +6456,7 @@ MonoBehaviour:
     m_Bits: 512
   horizontalRayCount: 4
   verticalRayCount: 4
+  portalManager: {fileID: 1423416660}
 --- !u!61 &1418748850
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6504,43 +6503,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.14078665, y: 0.4151668}
   m_EdgeRadius: 0
---- !u!114 &1418748851
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1418748846}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77c782805f0b7b145899a70b1a0dfc02, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1418748852
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1418748846}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb52c06784f3e644ea7f1159b34b42b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  materials:
-  - {fileID: 2100000, guid: dec854207c4abf741a519da7342f8c36, type: 2}
-  - {fileID: 2100000, guid: 725cfc2727b471049a2ce487be286b21, type: 2}
-  portalParent: {fileID: 0}
-  portal: {fileID: 308646652916847946, guid: 75cf84f13cbcd1043a9efc56d2313237, type: 3}
-  collisionMask:
-    serializedVersion: 2
-    m_Bits: 512
-  cam: {fileID: 1311427351}
-  angleThreshold: 5
-  portals:
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!1 &1423416657
 GameObject:
   m_ObjectHideFlags: 0

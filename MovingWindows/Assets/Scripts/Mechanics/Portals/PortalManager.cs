@@ -10,35 +10,54 @@ public class PortalManager : MonoBehaviour
     [SerializeField] private LayerMask collisionMask;
     [SerializeField] private Camera cam;
     [SerializeField] private float angleThreshold = 1f;
+   
 
     [HideInInspector] public GameObject[] portals;
 
     private float halfPortalWidth;
     public int noOfPortalsInScene;
 
+    [HideInInspector] public PortalInfo portalInfo;
+
 
     void Start()
     {
         halfPortalWidth = portalPrefab.GetComponent<Renderer>().bounds.extents.x;
         portals = new GameObject[2];
+        portalInfo = new PortalInfo();
     }
 
     // Update is called once per frame
     void Update()
     {
+        portalInfo.Reset();
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ResetPortals();
+        }
+
         if (noOfPortalsInScene == 2)
         {
             SwapTextures();
+
+            CheckPortals();
         }
 
         if (Input.GetMouseButtonDown(0))
         {
             if (noOfPortalsInScene < 2)
             {
-                
                 CastPortal();
             }
         }
+
+        if (portalInfo.inPortal)
+        {
+            Debug.Log($"Player in portal");
+        }
+
+
     }
 
     void CastPortal()
@@ -59,19 +78,18 @@ public class PortalManager : MonoBehaviour
 
             if (angle < angleThreshold) // Have hit a side wall
             {
-                // Check to see if portal will hit floor/ cieling -> adjust starting pos if so
+                // Check to see if edge of portal (in case of small floor) will hit floor/ cieling
 
-                Vector3 portalPosition = hit.point + hit.normal * halfPortalWidth;
+                Vector3 portalPosition = hit.point + wallDirection * halfPortalWidth;
 
-                RaycastHit2D downHit = Physics2D.Raycast(portalPosition, Vector2.down, halfPortalWidth, collisionMask);
+                RaycastHit2D downHit = Physics2D.Raycast((portalPosition - (Vector3)wallDirection * (halfPortalWidth - 0.01f)), Vector2.down, halfPortalWidth, collisionMask);
                 if (downHit)
                 {
                     float adjustmentDistance = halfPortalWidth - downHit.distance;
                     portalPosition.y += adjustmentDistance;
                 }
 
-                RaycastHit2D upHit = Physics2D.Raycast(portalPosition, Vector2.up, halfPortalWidth, collisionMask);
-                Debug.DrawRay(portalPosition, Vector2.up, Color.blue, 5f);
+                RaycastHit2D upHit = Physics2D.Raycast((portalPosition - (Vector3)wallDirection * (halfPortalWidth - 0.01f)), Vector2.up, halfPortalWidth, collisionMask);
                 if (upHit)
                 {
                     if (downHit)
@@ -107,8 +125,8 @@ public class PortalManager : MonoBehaviour
 
     void ResetPortals()
     {
+        Destroy(portals[0]);
         Destroy(portals[1]);
-        Destroy(portals[2]);
 
         portals[0] = null;
         portals[1] = null;
@@ -124,5 +142,64 @@ public class PortalManager : MonoBehaviour
 
         portals[0].GetComponent<Renderer>().material.SetVector("_Offset", -offset);
         portals[1].GetComponent<Renderer>().material.SetVector("_Offset", offset);
+    }
+
+    bool CheckBounds(Transform portal, BoxCollider2D playerCollider)
+    {
+
+        Bounds portal1Bounds = portal.GetComponent<Renderer>().bounds;
+        Bounds playerBounds = playerCollider.bounds;
+
+        if (portal1Bounds.min.y > playerBounds.min.y || portal1Bounds.max.y < playerBounds.max.y)
+        {
+            return false;
+        }
+
+        return (portal1Bounds.min.x > playerBounds.min.x || portal1Bounds.max.x < playerBounds.max.x) ? false : true;
+    }
+
+    void CheckPortals()
+    {
+        for (int i = 0; i < portals.Length; i++)
+        {
+            {
+                Transform portal = portals[i].transform;
+
+                if (CheckBounds(portal, player.GetComponent<BoxCollider2D>()))
+                {
+                    portalInfo.inPortal = true;
+                    portalInfo.currentPortal = portal;
+                    portalInfo.targetPortal = portals[(i + 1) % 2].transform;
+                    return;
+                }
+            }
+        }
+    }
+
+    public void SwapPlayerPosition()
+    {
+        //if (Input.GetKeyDown(KeyCode.P))
+        //{
+        Transform currentPortal = portalInfo.currentPortal;
+        Transform targetPortal = portalInfo.targetPortal;
+
+        Vector3 offset = targetPortal.position - currentPortal.position;
+        Debug.DrawRay(transform.position, offset, Color.yellow, 10f);
+        player.position = player.position + offset;
+        //}
+    }
+
+    public struct PortalInfo
+    {
+        public bool inPortal;
+        public Transform currentPortal;
+        public Transform targetPortal;
+
+        public void Reset()
+        {
+            inPortal = false;
+            currentPortal = null;
+            targetPortal = null;
+        }
     }
 }

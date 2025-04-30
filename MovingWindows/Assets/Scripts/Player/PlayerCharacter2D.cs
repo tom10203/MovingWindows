@@ -20,12 +20,12 @@ public class PlayerCharacter2D : MonoBehaviour
     RaycastOrigins raycastOrigins;
     public CollisionInfo collisions;
 
-    private CheckPortalBounds portalBounds;
+    [SerializeField] private PortalManager portalManager;
 
+    int debugCheck;
     void Start()
     {
         collider = GetComponent<BoxCollider2D>();
-        portalBounds = GetComponent<CheckPortalBounds>();
         CalculateRaySpacing();
     }
 
@@ -34,6 +34,8 @@ public class PlayerCharacter2D : MonoBehaviour
         UpdateRaycastOrigins();
         collisions.Reset();
         collisions.velocityOld = velocity;
+
+        debugCheck = 0;
 
         if (velocity.y < 0)
         {
@@ -53,6 +55,8 @@ public class PlayerCharacter2D : MonoBehaviour
 
     void HorizontalCollisions(ref Vector3 velocity)
     {
+        debugCheck++;
+
         float directionX = Mathf.Sign(velocity.x);
         float rayLength = Mathf.Abs(velocity.x) + skinWidth;
 
@@ -68,13 +72,17 @@ public class PlayerCharacter2D : MonoBehaviour
             {
                 // Sawp positions then check for collisions
 
-                if (portalBounds.portalInfo.inPortal)
+                if (portalManager.portalInfo.inPortal)
                 {
                     Debug.Log($"Player swapping positions");
-                    portalBounds.SwapPlayerPosition();
+                    portalManager.SwapPlayerPosition();
                     UpdateRaycastOrigins();
+                    if (debugCheck >= 2)
+                    {
+                        Debug.Break();
+                    }
                     HorizontalCollisions(ref velocity);
-                    Debug.Break();
+                    
                     return;
                 }
 
