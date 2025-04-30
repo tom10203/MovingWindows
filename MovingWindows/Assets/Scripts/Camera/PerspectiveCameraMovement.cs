@@ -15,22 +15,6 @@ public class PerspectiveCameraMovement : MonoBehaviour
 
     void Update()
     {
-        Vector2 movement = Vector2.zero;
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            movement = Vector2.left * Time.deltaTime * moveSpeed;
-            
-        }
-        else if (Input.GetKey(KeyCode.RightArrow)) 
-        {
-            movement = Vector2.right * Time.deltaTime * moveSpeed;
-        }
-
-        if (movement != Vector2.zero)
-        {
-            transform.Translate(movement);
-            MoveCameras(movement);
-        }
 
     }
 

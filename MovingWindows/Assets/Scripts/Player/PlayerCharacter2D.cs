@@ -20,9 +20,12 @@ public class PlayerCharacter2D : MonoBehaviour
     RaycastOrigins raycastOrigins;
     public CollisionInfo collisions;
 
+    private CheckPortalBounds portalBounds;
+
     void Start()
     {
         collider = GetComponent<BoxCollider2D>();
+        portalBounds = GetComponent<CheckPortalBounds>();
         CalculateRaySpacing();
     }
 
@@ -63,6 +66,18 @@ public class PlayerCharacter2D : MonoBehaviour
 
             if (hit)
             {
+                // Sawp positions then check for collisions
+
+                if (portalBounds.portalInfo.inPortal)
+                {
+                    Debug.Log($"Player swapping positions");
+                    portalBounds.SwapPlayerPosition();
+                    UpdateRaycastOrigins();
+                    HorizontalCollisions(ref velocity);
+                    Debug.Break();
+                    return;
+                }
+
 
                 float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
 
@@ -115,7 +130,7 @@ public class PlayerCharacter2D : MonoBehaviour
 
             if (hit)
             {
-                Debug.Log($"Vertical collision with {hit.collider.name}");  
+
                 velocity.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;
 
@@ -242,6 +257,5 @@ public class PlayerCharacter2D : MonoBehaviour
             slopeAngle = 0;
         }
     }
-
 
 }

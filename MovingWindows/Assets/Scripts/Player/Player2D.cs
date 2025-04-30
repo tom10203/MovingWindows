@@ -24,7 +24,6 @@ public class Player2D : MonoBehaviour
 
         gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
-        print("Gravity: " + gravity + "  Jump Velocity: " + jumpVelocity);
     }
 
     void Update()
