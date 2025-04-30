@@ -52,11 +52,6 @@ public class PortalManager : MonoBehaviour
             }
         }
 
-        if (portalInfo.inPortal)
-        {
-            Debug.Log($"Player in portal");
-        }
-
 
     }
 
@@ -184,7 +179,6 @@ public class PortalManager : MonoBehaviour
         Transform targetPortal = portalInfo.targetPortal;
 
         Vector3 offset = targetPortal.position - currentPortal.position;
-        Debug.DrawRay(transform.position, offset, Color.yellow, 10f);
         player.position = player.position + offset;
         //}
     }
