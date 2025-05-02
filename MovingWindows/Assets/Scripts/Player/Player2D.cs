@@ -8,6 +8,7 @@ public class Player2D : MonoBehaviour
 
     public float jumpHeight = 4;
     public float timeToJumpApex = .4f;
+    public float decellerationTimeGrounded = 0.05f;
     float accelerationTimeAirborne = .2f;
     float accelerationTimeGrounded = .1f;
     float moveSpeed = 6;
@@ -37,18 +38,20 @@ public class Player2D : MonoBehaviour
             velocity.y = 0;
         }
 
-        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        if (controller.collisions.left || controller.collisions.right)
+        {
+            velocity.x = 0;
+        }
 
-        Vector2 testInput = playerInput.actions["Move"].ReadValue<Vector2>();
-        //Debug.Log($"TestInput {testInput}");
+        Vector2 input = playerInput.actions["Move"].ReadValue<Vector2>();
 
         if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
         {
             velocity.y = jumpVelocity;
         }
 
-        float targetVelocityX = testInput.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
+        float targetVelocityX = input.x * moveSpeed;
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (!controller.collisions.below) ? accelerationTimeAirborne : (targetVelocityX == 0 ? decellerationTimeGrounded : accelerationTimeGrounded));
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }

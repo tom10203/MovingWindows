@@ -6,6 +6,7 @@ public class PortalManager : MonoBehaviour
     [SerializeField] private GameObject portalPrefab;
     [SerializeField] private Material[] materials;
     [SerializeField] private Transform player;
+    [SerializeField] private GameObject dummy;
 
     [SerializeField] private LayerMask collisionMask;
     [SerializeField] private Camera cam;
@@ -15,16 +16,23 @@ public class PortalManager : MonoBehaviour
     [HideInInspector] public GameObject[] portals;
 
     private float halfPortalWidth;
+    private float halfPortalHeight;
     public int noOfPortalsInScene;
+    private BoxCollider2D boxCollider;
 
     [HideInInspector] public PortalInfo portalInfo;
+
 
 
     void Start()
     {
         halfPortalWidth = portalPrefab.GetComponent<Renderer>().bounds.extents.x;
+        halfPortalHeight = portalPrefab.GetComponent<Renderer>().bounds.extents.y;
+        boxCollider = player.GetComponent<BoxCollider2D>();
+
         portals = new GameObject[2];
         portalInfo = new PortalInfo();
+
     }
 
     // Update is called once per frame
@@ -52,7 +60,6 @@ public class PortalManager : MonoBehaviour
             }
         }
 
-
     }
 
     void CastPortal()
@@ -77,14 +84,14 @@ public class PortalManager : MonoBehaviour
 
                 Vector3 portalPosition = hit.point + wallDirection * halfPortalWidth;
 
-                RaycastHit2D downHit = Physics2D.Raycast((portalPosition - (Vector3)wallDirection * (halfPortalWidth - 0.01f)), Vector2.down, halfPortalWidth, collisionMask);
+                RaycastHit2D downHit = Physics2D.Raycast((portalPosition - (Vector3)wallDirection * (halfPortalWidth - 0.01f)), Vector2.down, halfPortalHeight, collisionMask);
                 if (downHit)
                 {
-                    float adjustmentDistance = halfPortalWidth - downHit.distance;
+                    float adjustmentDistance = halfPortalHeight - downHit.distance;
                     portalPosition.y += adjustmentDistance;
                 }
 
-                RaycastHit2D upHit = Physics2D.Raycast((portalPosition - (Vector3)wallDirection * (halfPortalWidth - 0.01f)), Vector2.up, halfPortalWidth, collisionMask);
+                RaycastHit2D upHit = Physics2D.Raycast((portalPosition - (Vector3)wallDirection * (halfPortalWidth - 0.01f)), Vector2.up, halfPortalHeight, collisionMask);
                 if (upHit)
                 {
                     if (downHit)
@@ -93,7 +100,7 @@ public class PortalManager : MonoBehaviour
                         return;
                     }
 
-                    float adjustmentDistance = halfPortalWidth - upHit.distance;
+                    float adjustmentDistance = halfPortalHeight - upHit.distance;
                     portalPosition.y -= adjustmentDistance;
                 }
 
@@ -145,12 +152,32 @@ public class PortalManager : MonoBehaviour
         Bounds portal1Bounds = portal.GetComponent<Renderer>().bounds;
         Bounds playerBounds = playerCollider.bounds;
 
+
         if (portal1Bounds.min.y > playerBounds.min.y || portal1Bounds.max.y < playerBounds.max.y)
         {
             return false;
         }
 
         return (portal1Bounds.min.x > playerBounds.min.x || portal1Bounds.max.x < playerBounds.max.x) ? false : true;
+    }
+
+    Vector3 CalculateOffset()
+    {
+        return (portalInfo.targetPortal.position - portalInfo.currentPortal.position);
+    }
+
+    bool CheckBoundsTest(Transform portal, BoxCollider2D playerCollider)
+    {
+
+        Bounds portal1Bounds = portal.GetComponent<Renderer>().bounds;
+        Bounds playerBounds = playerCollider.bounds;
+
+        if ((portal1Bounds.min.y <= playerBounds.max.y && portal1Bounds.max.y >= playerBounds.min.y) && (portal1Bounds.min.x <= playerBounds.max.x && portal1Bounds.max.x >= playerBounds.min.x)) 
+        {
+            return true;
+        }
+
+        return false;
     }
 
     void CheckPortals()
@@ -160,7 +187,7 @@ public class PortalManager : MonoBehaviour
             {
                 Transform portal = portals[i].transform;
 
-                if (CheckBounds(portal, player.GetComponent<BoxCollider2D>()))
+                if (CheckBounds(portal, boxCollider))
                 {
                     portalInfo.inPortal = true;
                     portalInfo.currentPortal = portal;
@@ -173,14 +200,11 @@ public class PortalManager : MonoBehaviour
 
     public void SwapPlayerPosition()
     {
-        //if (Input.GetKeyDown(KeyCode.P))
-        //{
         Transform currentPortal = portalInfo.currentPortal;
         Transform targetPortal = portalInfo.targetPortal;
 
         Vector3 offset = targetPortal.position - currentPortal.position;
         player.position = player.position + offset;
-        //}
     }
 
     public struct PortalInfo

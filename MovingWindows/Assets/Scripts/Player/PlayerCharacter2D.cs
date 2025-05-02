@@ -74,7 +74,6 @@ public class PlayerCharacter2D : MonoBehaviour
 
                 if (portalManager.portalInfo.inPortal)
                 {
-                    Debug.Log($"Player swapping positions");
                     portalManager.SwapPlayerPosition();
                     UpdateRaycastOrigins();
                     if (debugCheck >= 2)
