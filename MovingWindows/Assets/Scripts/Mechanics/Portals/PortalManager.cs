@@ -40,7 +40,7 @@ public class PortalManager : MonoBehaviour
     {
         portalInfo.Reset();
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetMouseButtonDown(1))
         {
             ResetPortals();
         }
