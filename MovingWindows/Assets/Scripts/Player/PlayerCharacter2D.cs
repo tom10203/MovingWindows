@@ -38,10 +38,6 @@ public class PlayerCharacter2D : MonoBehaviour
 
         debugCheck = 0;
 
-        //if (velocity.y < 0)
-        //{
-        //    DescendSlope(ref velocity);
-        //}
         if (velocity.x != 0)
         {
             HorizontalCollisions(ref velocity);
@@ -50,6 +46,7 @@ public class PlayerCharacter2D : MonoBehaviour
         {
             VerticalCollisions(ref velocity);
         }
+
 
         transform.Translate(velocity);
     }
@@ -73,59 +70,33 @@ public class PlayerCharacter2D : MonoBehaviour
             {
                 // Sawp positions then check for collisions
 
-                if (portalManager.portalInfo.inPortal)
-                {
-                    portalManager.SwapPlayerPosition();
-                    UpdateRaycastOrigins();
-                    if (debugCheck >= 2)
-                    {
-                        Debug.Break();
-                    }
-                    HorizontalCollisions(ref velocity);
+                //if (portalManager.portalInfo.inPortal)
+                //{
+                //    portalManager.SwapPlayerPosition();
+                //    UpdateRaycastOrigins();
+                //    if (debugCheck >= 2)
+                //    {
+                //        Debug.Break();
+                //    }
+                //    HorizontalCollisions(ref velocity);
                     
-                    return;
-                }
+                //    return;
+                //}
 
 
                 float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
 
-                //if (i == 0 && slopeAngle <= maxClimbAngle)
-                //{
-                //    if (collisions.descendingSlope)
-                //    {
-                //        collisions.descendingSlope = false;
-                //        velocity = collisions.velocityOld;
-                //    }
-                //    float distanceToSlopeStart = 0;
-                //    if (slopeAngle != collisions.slopeAngleOld)
-                //    {
-                //        distanceToSlopeStart = hit.distance - skinWidth;
-                //        velocity.x -= distanceToSlopeStart * directionX;
-                //    }
-                //    ClimbSlope(ref velocity, slopeAngle);
-                //    velocity.x += distanceToSlopeStart * directionX;
-                //}
+           
+                
+                velocity.x = (hit.distance - skinWidth) * directionX;
+                rayLength = hit.distance;
+                
+             
 
-                //if (!collisions.climbingSlope || slopeAngle > maxClimbAngle)
-                //{
-                if (Mathf.Abs(90 - slopeAngle) < 1)
-                {
-                    velocity.x = (hit.distance - skinWidth) * directionX;
-                    rayLength = hit.distance;
-                }
-                else
-                {
-                    velocity.x = 0;
-                }
-
-                //if (collisions.climbingSlope)
-                //{
-                //    velocity.y = Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(velocity.x);
-                //}
 
                 collisions.left = directionX == -1;
                 collisions.right = directionX == 1;
-                //}
+               
             }
         }
     }
@@ -134,15 +105,9 @@ public class PlayerCharacter2D : MonoBehaviour
     {
         float directionY = Mathf.Sign(velocity.y);
         float rayLength = Mathf.Abs(velocity.y) + skinWidth;
-
-        
-        float yVelocity = Mathf.Abs(velocity.y);
+        float absoluteYVelocity = Mathf.Abs(velocity.y);
         float angle = 0f;
-        int dot = 0;
-        float h = 0;
-        float h1 = 0;
-
-        bool isHit = false;
+        bool debugHit = false;
 
         for (int i = 0; i < verticalRayCount; i++)
         {
@@ -154,66 +119,41 @@ public class PlayerCharacter2D : MonoBehaviour
 
             if (hit)
             {
-                isHit = true;
+                debugHit = true;
                 angle = Vector2.Angle(Vector2.up, hit.normal);
-                if (angle > minDescendAngle)
+                if (Mathf.Abs(angle) > 1 && directionY == -1)
                 {
-                    collisions.climbingSlope = true;
-                    dot = Vector2.Dot(Vector2.right, hit.normal) == 0 ? dot : (Vector2.Dot(Vector2.right, hit.normal) > 0 ? 1 : -1);
-                    h1 = (hit.distance - skinWidth);
-                    h = yVelocity - (hit.distance - skinWidth);
+                    collisions.sliding = true;
                 }
-                velocity.y = (hit.distance - skinWidth) * directionY;
-                rayLength = hit.distance;
+                else
+                {
+                    velocity.y = (hit.distance - skinWidth) * directionY;
+                    rayLength = hit.distance;
 
-                //if (collisions.climbingSlope)
-                //{
-                //    velocity.x = velocity.y / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
-                //}
-
-                collisions.below = directionY == -1;
-                collisions.above = directionY == 1;
+                    collisions.below = directionY == -1;
+                    collisions.above = directionY == 1;
+                }
+              
             }
         }
 
-        if (!isHit)
+        if (collisions.sliding)
         {
-            Debug.Log($"verticle raycast NOT hit");
-            collisions.below = false;
-        }
-        if (collisions.climbingSlope) // only true if hit angle is > than minDescendAngle
-        {
+            if (angle == 0f)
+            {
+                Debug.Log($"PLayer is sliding AND angle == 0");
+                Debug.Break();
+            }
             
-            float newY = - h - Mathf.Sin(angle) * h1;
-            float newX = Mathf.Cos(angle) * h1 * dot;
-
-            velocity.x = newX;
-            velocity.y = newY;
-
-            collisions.below = false;
+            velocity.y = -absoluteYVelocity * Mathf.Sin(angle * Mathf.Deg2Rad);
+            velocity.x = -absoluteYVelocity * Mathf.Cos(angle * Mathf.Deg2Rad);
 
         }
-        //else
-        //{
-        //    Debug.Log($"NOT ON SLOPE");
-        //}
-        //if (collisions.climbingSlope)
-        //{
-        //    float directionX = Mathf.Sign(velocity.x);
-        //    rayLength = Mathf.Abs(velocity.x) + skinWidth;
-        //    Vector2 rayOrigin = ((directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight) + Vector2.up * velocity.y;
-        //    RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
+        if (!debugHit)
+        {
+            Debug.Log($"NOT RAYCAST HIT");
+        }
 
-        //    if (hit)
-        //    {
-        //        float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-        //        if (slopeAngle != collisions.slopeAngle)
-        //        {
-        //            velocity.x = (hit.distance - skinWidth) * directionX;
-        //            collisions.slopeAngle = slopeAngle;
-        //        }
-        //    }
-        //}
     }
 
     void ClimbSlope(ref Vector3 velocity, float slopeAngle)
@@ -296,6 +236,8 @@ public class PlayerCharacter2D : MonoBehaviour
 
         public bool climbingSlope;
         public bool descendingSlope;
+        public bool sliding;
+
         public float slopeAngle, slopeAngleOld;
         public Vector3 velocityOld;
 
@@ -305,6 +247,8 @@ public class PlayerCharacter2D : MonoBehaviour
             left = right = false;
             climbingSlope = false;
             descendingSlope = false;
+
+            sliding = false;
 
             slopeAngleOld = slopeAngle;
             slopeAngle = 0;

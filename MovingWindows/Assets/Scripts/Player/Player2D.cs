@@ -21,6 +21,8 @@ public class Player2D : MonoBehaviour
     public PlayerCharacter2D controller;
     [HideInInspector] public PlayerInput playerInput;
 
+    Vector3 oldVelocity;
+
     void Start()
     {
         controller = GetComponent<PlayerCharacter2D>();
@@ -32,6 +34,10 @@ public class Player2D : MonoBehaviour
 
     void Update()
     {
+        if (controller.collisions.sliding)
+        {
+            velocity.y = oldVelocity.y;
+        }
 
         if (controller.collisions.above || controller.collisions.below)
         {
@@ -53,6 +59,10 @@ public class Player2D : MonoBehaviour
         float targetVelocityX = input.x * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (!controller.collisions.below) ? accelerationTimeAirborne : (targetVelocityX == 0 ? decellerationTimeGrounded : accelerationTimeGrounded));
         velocity.y += gravity * Time.deltaTime;
+        oldVelocity = velocity;
         controller.Move(velocity * Time.deltaTime);
+
+        
     }
+
 }
