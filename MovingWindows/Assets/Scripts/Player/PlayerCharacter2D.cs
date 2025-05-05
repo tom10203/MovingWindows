@@ -70,18 +70,18 @@ public class PlayerCharacter2D : MonoBehaviour
             {
                 // Sawp positions then check for collisions
 
-                //if (portalManager.portalInfo.inPortal)
-                //{
-                //    portalManager.SwapPlayerPosition();
-                //    UpdateRaycastOrigins();
-                //    if (debugCheck >= 2)
-                //    {
-                //        Debug.Break();
-                //    }
-                //    HorizontalCollisions(ref velocity);
-                    
-                //    return;
-                //}
+                if (portalManager.portalInfo.inPortal)
+                {
+                    portalManager.SwapPlayerPosition();
+                    UpdateRaycastOrigins();
+                    if (debugCheck >= 2)
+                    {
+                        Debug.Break();
+                    }
+                    HorizontalCollisions(ref velocity);
+
+                    return;
+                }
 
 
                 float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
@@ -107,7 +107,7 @@ public class PlayerCharacter2D : MonoBehaviour
         float rayLength = Mathf.Abs(velocity.y) + skinWidth;
         float absoluteYVelocity = Mathf.Abs(velocity.y);
         float angle = 0f;
-        bool debugHit = false;
+        float directionX = 0f;
 
         for (int i = 0; i < verticalRayCount; i++)
         {
@@ -119,8 +119,9 @@ public class PlayerCharacter2D : MonoBehaviour
 
             if (hit)
             {
-                debugHit = true;
                 angle = Vector2.Angle(Vector2.up, hit.normal);
+                directionX = Mathf.Sign(hit.normal.x);
+
                 if (Mathf.Abs(angle) > 1 && directionY == -1)
                 {
                     collisions.sliding = true;
@@ -146,12 +147,8 @@ public class PlayerCharacter2D : MonoBehaviour
             }
             
             velocity.y = -absoluteYVelocity * Mathf.Sin(angle * Mathf.Deg2Rad);
-            velocity.x = -absoluteYVelocity * Mathf.Cos(angle * Mathf.Deg2Rad);
+            velocity.x = directionX * absoluteYVelocity * Mathf.Cos(angle * Mathf.Deg2Rad);
 
-        }
-        if (!debugHit)
-        {
-            Debug.Log($"NOT RAYCAST HIT");
         }
 
     }

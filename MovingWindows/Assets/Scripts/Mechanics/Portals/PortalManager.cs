@@ -6,7 +6,6 @@ public class PortalManager : MonoBehaviour
     [SerializeField] private GameObject portalPrefab;
     [SerializeField] private Material[] materials;
     [SerializeField] private Transform player;
-    [SerializeField] private GameObject dummy;
 
     [SerializeField] private LayerMask collisionMask;
     [SerializeField] private Camera cam;
@@ -114,7 +113,11 @@ public class PortalManager : MonoBehaviour
 
     void InstantiatePortal(Vector3 startPos)
     {
+        
         GameObject newPortal = Instantiate(portalPrefab, startPos, Quaternion.Euler(-90,0,0), transform);
+        Vector3 portalLocalPos = newPortal.transform.localPosition;
+        portalLocalPos = new Vector3(portalLocalPos.x, portalLocalPos.y, -0.2f);
+        newPortal.transform.localPosition = portalLocalPos;
 
         Material material = (noOfPortalsInScene == 0 ? materials[0] : materials[1]);
 
