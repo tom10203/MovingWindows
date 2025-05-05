@@ -2815,8 +2815,10 @@ MonoBehaviour:
   - {fileID: 1323111502}
   staticCameras: []
   cameraMoveAmount1: 0.6
+  cameraMoveDifference: 0.2
   cameraMoveAmount2: 0.4
   moveSpeed: 5
+  maxSize: 0
 --- !u!114 &669460135
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9009,8 +9011,10 @@ MonoBehaviour:
   - {fileID: 608805958}
   - {fileID: 567852846}
   cameraMoveAmount1: 0.6
+  cameraMoveDifference: 0.2
   cameraMoveAmount2: 0.4
   moveSpeed: 5
+  maxSize: 0
 --- !u!114 &1311427353
 MonoBehaviour:
   m_ObjectHideFlags: 0
