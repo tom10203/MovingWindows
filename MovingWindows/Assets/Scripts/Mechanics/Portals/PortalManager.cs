@@ -21,7 +21,7 @@ public class PortalManager : MonoBehaviour
 
     [HideInInspector] public PortalInfo portalInfo;
 
-
+    bool setPortalBounds = true;
 
     void Start()
     {
@@ -49,6 +49,14 @@ public class PortalManager : MonoBehaviour
             SwapTextures();
 
             CheckPortals();
+
+            if (setPortalBounds)
+            {
+                setPortalBounds = false;
+                SetPortalBounds();
+            }
+
+            Debug.Log($"Portalmanager portalbounds {portalInfo.portalBounds}");
         }
 
         if (Input.GetMouseButtonDown(0))
@@ -59,6 +67,40 @@ public class PortalManager : MonoBehaviour
             }
         }
 
+        
+
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (noOfPortalsInScene == 2)
+        {
+            Gizmos.color = new Color(0, 0, 1, 0.5f);
+            Gizmos.DrawCube(portalInfo.portalBounds.center, portalInfo.portalBounds.size);
+        }
+    }
+
+    void SetPortalBounds()
+    {
+        // only called when both portals are cast
+
+        float minX = Mathf.Min(portals[0].GetComponent<Portal>().bounds.min.x, portals[1].GetComponent<Portal>().bounds.min.x, boxCollider.bounds.min.x);
+        float maxX = Mathf.Max(portals[0].GetComponent<Portal>().bounds.max.x, portals[1].GetComponent<Portal>().bounds.max.x, boxCollider.bounds.max.x);
+
+        float minY = Mathf.Min(portals[0].GetComponent<Portal>().bounds.min.y, portals[1].GetComponent<Portal>().bounds.min.y, boxCollider.bounds.min.y);
+        float maxY = Mathf.Max(portals[0].GetComponent<Portal>().bounds.max.y, portals[1].GetComponent<Portal>().bounds.max.y, boxCollider.bounds.max.y);
+
+        Debug.Log($"Minx {minX}, maxX {maxX}, minY {minY}, maxY {maxY}");
+        Debug.Log($"portal manager portal bounds {portals[0].GetComponent<Portal>().bounds}, {portals[1].GetComponent<Portal>().bounds}");
+
+        float xDst = (maxX - minX);
+        float yDst = (maxY - minY);
+
+        float centreX = (minX + maxX) / 2;
+        float centreY = (minY + maxY) / 2;
+
+        portalInfo.portalBounds = new Bounds (new Vector2 (centreX, centreY), new Vector2(xDst, yDst));
+        Debug.Log($"Setting portbounds {portalInfo.portalBounds}");
     }
 
     void CastPortal()
@@ -136,6 +178,9 @@ public class PortalManager : MonoBehaviour
         portals[0] = null;
         portals[1] = null;
         noOfPortalsInScene = 0;
+
+        setPortalBounds = true;
+        portalInfo.portalBounds = new Bounds();
     }
 
     void SwapTextures()
@@ -215,12 +260,17 @@ public class PortalManager : MonoBehaviour
         public bool inPortal;
         public Transform currentPortal;
         public Transform targetPortal;
+        public float minX, maxX;
+        public float minY, maxY;
+        public Vector2 centre;
+        public Bounds portalBounds;
 
         public void Reset()
         {
             inPortal = false;
             currentPortal = null;
             targetPortal = null;
+
         }
     }
 }
