@@ -70,18 +70,18 @@ public class PlayerCharacter2D : MonoBehaviour
             {
                 // Sawp positions then check for collisions
 
-                if (portalManager.portalInfo.inPortal)
-                {
-                    portalManager.SwapPlayerPosition();
-                    UpdateRaycastOrigins();
-                    if (debugCheck >= 2)
-                    {
-                        Debug.Break();
-                    }
-                    HorizontalCollisions(ref velocity);
+                //if (portalManager.portalInfo.inPortal)
+                //{
+                //    portalManager.SwapPlayerPosition();
+                //    UpdateRaycastOrigins();
+                //    if (debugCheck >= 2)
+                //    {
+                //        Debug.Break();
+                //    }
+                //    HorizontalCollisions(ref velocity);
 
-                    return;
-                }
+                //    return;
+                //}
 
 
                 float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
