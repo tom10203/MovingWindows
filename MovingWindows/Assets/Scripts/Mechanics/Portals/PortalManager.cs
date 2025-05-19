@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 
-public class PortalManager : MonoBehaviour
+public class PortalManager : InPlayScript
 {
     [SerializeField] private GameObject portalPrefab;
     [SerializeField] private Material[] materials;
@@ -14,6 +14,7 @@ public class PortalManager : MonoBehaviour
 
     [SerializeField] private LayerMask collisionMask;
     [SerializeField] private Camera cam;
+    [SerializeField] private Camera textureCam;
     [SerializeField] private float angleThreshold = 1f;
     [SerializeField] private PlayerInput input;
 
@@ -35,6 +36,8 @@ public class PortalManager : MonoBehaviour
 
     VirtualBounds vb = new VirtualBounds();
     CastPortal castPortal;
+
+    bool setTextureCamPos = true;
     void Start()
     {
         halfPortalWidth = portalPrefab.GetComponent<Renderer>().bounds.extents.x;
@@ -50,58 +53,61 @@ public class PortalManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        portalInfo.Reset();
-
-        if (input.actions["Attack"].WasPerformedThisFrame() && noOfPortalsInScene < 2)
+        if (inPlay)
         {
-            Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
-            castPortal.PerformCast(mousePos);
-        }
 
-        if (Input.GetMouseButtonDown(1))
-        {
-            ResetPortals();
-        }
 
-        if (noOfPortalsInScene == 2)
-        {
-            SwapTextures();
+            portalInfo.Reset();
 
-            CheckPortals();
 
-            if (setPortalBounds)
+            if (input.actions["Attack"].WasPerformedThisFrame() && noOfPortalsInScene < 2)
             {
-                setPortalBounds = false;
-                SetPortalBounds();
+                Vector3 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
+                castPortal.PerformCast(mousePos);
             }
 
-            if (portalInfo.inPortal)
+            if (Input.GetMouseButtonDown(1))
             {
-                if (swapPositions)
+                ResetPortals();
+            }
+
+            if (noOfPortalsInScene == 2)
+            {
+                if (setTextureCamPos)
                 {
-                    SwapPlayerPosition();
-                    swapPositions = false;
+                    setTextureCamPos = false;
+                    SetTextureCamPosition();
                 }
+
+                SwapTextures();
+
+                CheckPortals();
+
+                if (setPortalBounds)
+                {
+                    setPortalBounds = false;
+                    SetPortalBounds();
+                }
+
+                if (portalInfo.inPortal)
+                {
+                    if (swapPositions)
+                    {
+                        SwapPlayerPosition();
+                        swapPositions = false;
+                    }
+                }
+                else
+                {
+                    swapPositions = true;
+                }
+
             }
             else
             {
-                swapPositions = true;
-            }
-
-        }
-
-
-        //Debug.Log(portalInfo.inPortal);
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (noOfPortalsInScene < 2)
-            {
-                //CastPortal();
+                setTextureCamPos = true;
             }
         }
-
-        
 
     }
 
@@ -113,6 +119,15 @@ public class PortalManager : MonoBehaviour
     //        Gizmos.DrawCube(portalInfo.portalBounds.center, portalInfo.portalBounds.size);
     //    }
     //}
+    void SetTextureCamPosition()
+    {
+        Vector3 pos1 = portals[0].transform.position;
+        Vector3 pos2 = portals[1].transform.position;
+
+        Vector3 midPoint = (pos1 + pos2) / 2;
+
+        textureCam.transform.position = new Vector3(midPoint.x, midPoint.y, textureCam.transform.position.z);
+    }
 
     Bounds CreateVirtualBounds(Vector3 boundsCenter)
     {
@@ -379,10 +394,16 @@ public class PortalManager : MonoBehaviour
         Vector3 screenSpace1 = cam.WorldToViewportPoint(portals[0].transform.position);
         Vector3 screenSpace2 = cam.WorldToViewportPoint(portals[1].transform.position);
 
-        Vector3 offset = screenSpace1 - screenSpace2;
+        Vector3 camSpace1 = cam.WorldToViewportPoint(cam.transform.position);
+        Vector3 camSpace2 = cam.WorldToViewportPoint(textureCam.transform.position);
 
-        portals[0].GetComponent<Renderer>().material.SetVector("_Offset", -offset);
-        portals[1].GetComponent<Renderer>().material.SetVector("_Offset", offset);
+
+        Vector3 offset = screenSpace1 - screenSpace2;
+        Vector3 camTransformOffset = camSpace1 - camSpace2;
+
+        portals[0].GetComponent<Renderer>().material.SetVector("_Offset", -offset + camTransformOffset);
+        portals[1].GetComponent<Renderer>().material.SetVector("_Offset", offset  + camTransformOffset);
+        
     }
 
     bool CheckBounds(Transform portal, BoxCollider2D playerCollider)
@@ -400,20 +421,6 @@ public class PortalManager : MonoBehaviour
         return (portal1Bounds.min.x > playerBounds.min.x || portal1Bounds.max.x < playerBounds.max.x) ? false : true;
     }
 
-    //bool CheckBoundsPortal(Transform portal, Transform portal2)
-    //{
-
-    //    Bounds portal1Bounds = portal.GetComponent<Renderer>().bounds;
-    //    Bounds portalBounds2 = portal2.bounds;
-
-
-    //    if (portal1Bounds.min.y > playerBounds.min.y || portal1Bounds.max.y < playerBounds.max.y)
-    //    {
-    //        return false;
-    //    }
-
-    //    return (portal1Bounds.min.x > playerBounds.min.x || portal1Bounds.max.x < playerBounds.max.x) ? false : true;
-    //}
 
     Vector3 CalculateOffset()
     {
@@ -456,7 +463,6 @@ public class PortalManager : MonoBehaviour
 
     public void SwapPlayerPosition()
     {
-        Debug.Log($"Swappingplayerposition");
         Transform currentPortal = portalInfo.currentPortal;
         Transform targetPortal = portalInfo.targetPortal;
 

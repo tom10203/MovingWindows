@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SocialPlatforms.GameCenter;
 
-public class CameraFollow : MonoBehaviour
+public class CameraFollow : InPlayScript
 {
     public Transform targetTransform;
     private Player2D target;
@@ -29,10 +30,16 @@ public class CameraFollow : MonoBehaviour
     bool updateAreaPortals = true;
     bool updateAreaPlayer = false;
 
+    Vector3 vel1;
+    RaycastCollisions raycastCollisions;
+
+    public float timeScale = 0.5f;
+
     void Start()
     {
         target = targetTransform.GetComponent<Player2D>();
         targetCollider = targetTransform.GetComponent<BoxCollider2D>();
+        raycastCollisions = GetComponent<RaycastCollisions>();
 
         focusArea = new FocusArea(targetCollider.bounds, focusAreaSize);
 
@@ -41,6 +48,9 @@ public class CameraFollow : MonoBehaviour
 
     void LateUpdate()
     {
+        
+        Time.timeScale = timeScale;
+
         if (portalManager.noOfPortalsInScene == 2)
         {
             if (updateAreaPortals && portalManager.portalInfo.portalBounds.center != Vector3.zero)
@@ -61,45 +71,61 @@ public class CameraFollow : MonoBehaviour
             }
         }
 
+
+        
         focusArea.Update(targetCollider.bounds);
 
-        //focusPosition = Vector2.SmoothDamp(focusPosition, focusArea.centre + Vector2.up * verticalOffset, ref vel, verticalSmoothTime);
-        focusPosition = focusArea.centre + Vector2.up * verticalOffset;
-
-        if (focusArea.velocity.x != 0)
+        if (inPlay)
         {
-            lookAheadDirX = Mathf.Sign(focusArea.velocity.x);
-            float targetInputX = target.playerInput.actions["Move"].ReadValue<Vector2>().x;
-            if (Mathf.Sign(targetInputX) == Mathf.Sign(focusArea.velocity.x) && targetInputX != 0)
+            //focusPosition = Vector2.SmoothDamp(focusPosition, focusArea.centre + Vector2.up * verticalOffset, ref vel, verticalSmoothTime);
+            focusPosition = focusArea.centre + Vector2.up * verticalOffset;
+
+            if (focusArea.velocity.x != 0)
             {
-                lookAheadStopped = false;
-                targetLookAheadX = lookAheadDirX * lookAheadDstX;
-            }
-            else
-            {
-                if (!lookAheadStopped)
+                lookAheadDirX = Mathf.Sign(focusArea.velocity.x);
+                float targetInputX = target.playerInput.actions["Move"].ReadValue<Vector2>().x;
+                if (Mathf.Sign(targetInputX) == Mathf.Sign(focusArea.velocity.x) && targetInputX != 0)
                 {
-                    lookAheadStopped = true;
-                    targetLookAheadX = currentLookAheadX + (lookAheadDirX * lookAheadDstX - currentLookAheadX) / 4f;
+                    lookAheadStopped = false;
+                    targetLookAheadX = lookAheadDirX * lookAheadDstX;
+                }
+                else
+                {
+                    if (!lookAheadStopped)
+                    {
+                        lookAheadStopped = true;
+                        targetLookAheadX = currentLookAheadX + (lookAheadDirX * lookAheadDstX - currentLookAheadX) / 4f;
+                    }
                 }
             }
+
+            float oldCurrentLookAheadX = currentLookAheadX;
+
+            currentLookAheadX = Mathf.SmoothDamp(currentLookAheadX, targetLookAheadX, ref smoothLookVelocityX, lookSmoothTimeX);
+
+            //focusPosition.y = Mathf.SmoothDamp(transform.position.y, focusPosition.y, ref smoothVelocityY, verticalSmoothTime);
+
+
+            // Add raycast logic here
+            Vector3 targetPosition = Vector3.SmoothDamp(transform.position, (Vector3)focusPosition + Vector3.forward * -24.34267f, ref vel1, 0.2f);
+
+            Vector3 velocity = targetPosition - transform.position;
+            Vector3 refVelocity = velocity;
+
+            raycastCollisions.PerformCollisionCheck(ref velocity);
+
+            if (refVelocity != velocity)
+            {
+                currentLookAheadX = oldCurrentLookAheadX;
+            }
+
+            focusPosition += Vector2.right * currentLookAheadX;
+
+            transform.position += velocity;
+
+            //transform.position = Vector3.SmoothDamp(transform.position, (Vector3)focusPosition + Vector3.forward * -24.34267f, ref vel1, 0.2f);
+            //transform.position = focusPosition;
         }
-
-
-        currentLookAheadX = Mathf.SmoothDamp(currentLookAheadX, targetLookAheadX, ref smoothLookVelocityX, lookSmoothTimeX);
-
-        focusPosition.y = Mathf.SmoothDamp(transform.position.y, focusPosition.y, ref smoothVelocityY, verticalSmoothTime);
-        focusPosition += Vector2.right * currentLookAheadX;
-        transform.position = (Vector3)focusPosition + Vector3.forward * -24.34267f;
-        transform.position = focusPosition;
-
-        
-
-
-
-      
-        
-        
     }
 
     void OnDrawGizmos()
@@ -130,6 +156,7 @@ public class CameraFollow : MonoBehaviour
             centre = new Vector2((left + right) / 2, (top + bottom) / 2);
             smoothTime = .2f;
         }
+
 
         public void UpdateFocusAreaPlayer(Bounds targetBounds, Vector2 size)
         {
@@ -178,7 +205,8 @@ public class CameraFollow : MonoBehaviour
             }
             top += shiftY;
             bottom += shiftY;
-            centre = Vector2.SmoothDamp(centre, new Vector2((left + right) / 2, (top + bottom) / 2), ref smoothVelocity, smoothTime);
+            centre = new Vector2((left + right) / 2, (top + bottom) / 2);
+            //centre = Vector2.SmoothDamp(centre, new Vector2((left + right) / 2, (top + bottom) / 2), ref smoothVelocity, smoothTime);
             velocity = new Vector2(shiftX, shiftY);
         }
     }

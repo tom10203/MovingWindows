@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerCharacter2D))]
-public class Player2D : MonoBehaviour
+public class Player2D : InPlayScript
 {
 
     public float jumpHeight = 4;
@@ -23,6 +23,8 @@ public class Player2D : MonoBehaviour
 
     Vector3 oldVelocity;
 
+    [SerializeField] TimeLineManager timeLineManager;
+
     void Start()
     {
         controller = GetComponent<PlayerCharacter2D>();
@@ -34,35 +36,40 @@ public class Player2D : MonoBehaviour
 
     void Update()
     {
-        if (controller.collisions.sliding)
+        if (inPlay)
         {
-            velocity.y = oldVelocity.y;
+            if (controller.collisions.sliding)
+            {
+                velocity.y = oldVelocity.y;
+            }
+
+            if (controller.collisions.above || controller.collisions.below)
+            {
+                velocity.y = 0;
+            }
+
+            if (controller.collisions.left || controller.collisions.right)
+            {
+                velocity.x = 0;
+            }
+
+            Vector2 input = playerInput.actions["Move"].ReadValue<Vector2>();
+
+            if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
+            {
+                velocity.y = jumpVelocity;
+            }
+
+            float targetVelocityX = input.x * moveSpeed;
+            velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (!controller.collisions.below) ? accelerationTimeAirborne : (targetVelocityX == 0 ? decellerationTimeGrounded : accelerationTimeGrounded));
+            velocity.y += gravity * Time.deltaTime;
+            oldVelocity = velocity;
+            controller.Move(velocity * Time.deltaTime);
         }
-
-        if (controller.collisions.above || controller.collisions.below)
-        {
-            velocity.y = 0;
-        }
-
-        if (controller.collisions.left || controller.collisions.right)
-        {
-            velocity.x = 0;
-        }
-
-        Vector2 input = playerInput.actions["Move"].ReadValue<Vector2>();
-
-        if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
-        {
-            velocity.y = jumpVelocity;
-        }
-
-        float targetVelocityX = input.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (!controller.collisions.below) ? accelerationTimeAirborne : (targetVelocityX == 0 ? decellerationTimeGrounded : accelerationTimeGrounded));
-        velocity.y += gravity * Time.deltaTime;
-        oldVelocity = velocity;
-        controller.Move(velocity * Time.deltaTime);
+    }
+}
 
         
-    }
 
-}
+      
+
