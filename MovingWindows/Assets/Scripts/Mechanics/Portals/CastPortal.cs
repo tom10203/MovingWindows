@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CastPortal : MonoBehaviour
+public class CastPortal : InPlayScript
 {
     [SerializeField] float castDst;
     [SerializeField] PlayerInput input;
@@ -42,7 +42,7 @@ public class CastPortal : MonoBehaviour
             InstantiateSpell(false);
             return false;
         }
-        else if (hit.collider.gameObject.layer == 11)
+        else if (hit.collider.gameObject.layer == 9 && hit.collider.gameObject.tag == "Moss")
         {
             Vector3 point = hit.point;
             point.z = 1f;

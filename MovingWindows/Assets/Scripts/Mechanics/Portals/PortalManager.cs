@@ -160,7 +160,6 @@ public class PortalManager : InPlayScript
         }
         else
         {
-            Debug.Log($"portals in scene insufficient for check");
             return false;
         }
     }
@@ -171,12 +170,12 @@ public class PortalManager : InPlayScript
         public Bounds virtualBounds;
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawCube(vb.virtualBounds.center, vb.virtualBounds.size);
-        Gizmos.DrawCube(vb.portalBounds.center, vb.portalBounds.size);
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.color = Color.yellow;
+    //    Gizmos.DrawCube(vb.virtualBounds.center, vb.virtualBounds.size);
+    //    Gizmos.DrawCube(vb.portalBounds.center, vb.portalBounds.size);
+    //}
 
     void SetPortalBounds()
     {
