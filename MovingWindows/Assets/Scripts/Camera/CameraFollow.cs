@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.SocialPlatforms.GameCenter;
+using UnityEngine.InputSystem;
 
 
 public class CameraFollow : InPlayScript
@@ -43,14 +44,12 @@ public class CameraFollow : InPlayScript
     public Vector2 focusAreaOffset;
 
     Bounds startFocusArea;
-
+    [SerializeField] PlayerInput input;
     
 
     void Start()
     {
-        target = targetTransform.GetComponent<Player2D>();
         targetCollider = targetTransform.GetComponent<BoxCollider2D>();
-        raycastCollisions = GetComponent<RaycastCollisions>();
 
         focusArea.smoothTime = .2f;
         focusArea.playerFocusAreaSize = focusAreaSize;
@@ -73,7 +72,6 @@ public class CameraFollow : InPlayScript
     void LateUpdate()
     {
         
-        //Time.timeScale = timeScale;
 
         // Below is to adjust focus area to center on portals when 2 portals are in scene
         //=====================================================================================
@@ -104,8 +102,6 @@ public class CameraFollow : InPlayScript
            
             focusArea.UpdateFocusArea(targetCollider.bounds);
 
-
-            //focusPosition = Vector2.SmoothDamp(focusPosition, focusArea.centre + Vector2.up * verticalOffset, ref vel, verticalSmoothTime);
             if (followFocusArea)
             {
                 //focusPosition = focusArea.centre + offset;
@@ -114,7 +110,7 @@ public class CameraFollow : InPlayScript
                 if (focusArea.velocity.x != 0)
                 {
                     lookAheadDirX = Mathf.Sign(focusArea.velocity.x);
-                    float targetInputX = target.playerInput.actions["Move"].ReadValue<Vector2>().x;
+                    float targetInputX = input.actions["Move"].ReadValue<Vector2>().x;
                     if (Mathf.Sign(targetInputX) == Mathf.Sign(focusArea.velocity.x) && targetInputX != 0)
                     {
                         lookAheadStopped = false;
@@ -135,29 +131,9 @@ public class CameraFollow : InPlayScript
 
                 focusPosition.x += currentLookAheadX;
 
-                //focusPosition.y = Mathf.SmoothDamp(transform.position.y, focusPosition.y, ref smoothVelocityY, verticalSmoothTime);
-
-
-                // Add raycast logic here
-                //Vector3 targetPosition = Vector3.SmoothDamp(transform.position, (Vector3)focusPosition + Vector3.forward * -24.34267f, ref vel1, 0.2f);
-
-                //Vector3 velocity = targetPosition - transform.position;
-                //Vector3 refVelocity = velocity;
-
-                //raycastCollisions.PerformCollisionCheck(ref velocity);
-
-                //if (refVelocity != velocity)
-                //{
-                //    currentLookAheadX = oldCurrentLookAheadX;
-                //}
-
-                //focusPosition += Vector2.right * currentLookAheadX;
-
-                //transform.position += velocity;
 
                 transform.position = Vector3.SmoothDamp(transform.position, (Vector3)focusPosition + Vector3.forward * -24.34267f, ref vel1, 0.2f);
             }
-            //transform.position = focusPosition;
         }
     }
 
@@ -166,16 +142,6 @@ public class CameraFollow : InPlayScript
         Gizmos.color = new Color(1, 0, 0, .5f);
         Gizmos.DrawCube(focusArea.centre, new Vector2(focusArea.right - focusArea.left, focusArea.top - focusArea.bottom));
     }
-
-
-    //private void OnDrawGizmos()
-    //{
-    //    Gizmos.color = UnityEngine.Color.red;
-
-
-    //    // Draw a wire cube (square if flat on one axis)
-    //    Gizmos.DrawWireCube(transform.position + (Vector3)focusAreaOffset, new Vector3(focusAreaSize.x, focusAreaSize.y, 0));
-    //}
 
 
     [System.Serializable]
@@ -190,28 +156,7 @@ public class CameraFollow : InPlayScript
         public Vector2 playerFocusAreaSize;
         public bool updateFocusArea;
 
-        //public FocusArea(Bounds targetBounds, Vector2 size)
-        //{
-        //    left = targetBounds.center.x - size.x / 2;
-        //    right = targetBounds.center.x + size.x / 2;
-        //    bottom = targetBounds.min.y;
-        //    top = targetBounds.min.y + size.y;
 
-        //    velocity = Vector2.zero;
-        //    smoothVelocity = Vector2.zero;
-        //    centre = new Vector2((left + right) / 2, (top + bottom) / 2);
-        //    smoothTime = .2f;
-        //}
-
-        //public FocusArea()
-        //{
-        //    centre = Vector2.zero;
-        //    velocity = Vector2.zero;
-        //    left = right = 0;
-        //    top = bottom = 0;
-        //    smoothVelocity = Vector2.zero;
-        //    smoothTime = .2f;
-        //}
    
 
         public void UpdateFocusAreaPlayer(Bounds targetBounds)

@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Moss
+  - MoveableObject
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - Bloom
   - Bloom-Moss
   - CameraObstacle
-  - 
+  - InteractableObjects
   - 
   - 
   - 
@@ -44,6 +45,9 @@ TagManager:
     locked: 0
   - name: Background
     uniqueID: 1372115489
+    locked: 0
+  - name: Forground
+    uniqueID: 18987443
     locked: 0
   m_RenderingLayers:
   - Default

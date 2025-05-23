@@ -34,18 +34,15 @@ public class SpeechBubbleManager : MonoBehaviour
     {
         if (input.actions["Attack"].WasPressedThisFrame())
         {
-            Debug.Log($"Next line clicked");
 
             if (mageSpeechBubble.gameObject && wizardSpeechBubble.gameObject && mageSpeechBubble.finished && wizardSpeechBubble.finished)
             {
-                Debug.Log($"Destroy speachbubbles");
                 gameStateManager.ToggleScripts();
                 Destroy(mageSpeechBubble.gameObject);
                 Destroy(wizardSpeechBubble.gameObject);
                 Destroy(gameObject);
             }
 
-            Debug.Log($"Here");
 
             if (mageSpeaking)
             {
@@ -64,8 +61,6 @@ public class SpeechBubbleManager : MonoBehaviour
             }
             else
             {
-                Debug.Log($"Here 2");
-
                 wizardSpeechBubble.gameObject.SetActive(true);
                 wizardSpeechBubble.EnableSR();
 

@@ -33,7 +33,6 @@ public class SpeachBubble : MonoBehaviour
     {
         if (currentLineIndex >= textLines.Length)
         {
-            Debug.Log("SpeechBubble index outside of array length");
             return;
         }
 

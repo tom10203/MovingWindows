@@ -36,23 +36,25 @@ public class Player2D : InPlayScript
 
     void Update()
     {
+     
+        if (controller.collisions.sliding)
+        {
+            velocity.y = oldVelocity.y;
+        }
+
+        if (controller.collisions.above || controller.collisions.below)
+        {
+            velocity.y = 0;
+        }
+
+        if (controller.collisions.left || controller.collisions.right)
+        {
+            velocity.x = 0;
+        }
+
+        float targetVelocityX;
         if (inPlay)
         {
-            if (controller.collisions.sliding)
-            {
-                velocity.y = oldVelocity.y;
-            }
-
-            if (controller.collisions.above || controller.collisions.below)
-            {
-                velocity.y = 0;
-            }
-
-            if (controller.collisions.left || controller.collisions.right)
-            {
-                velocity.x = 0;
-            }
-
             Vector2 input = playerInput.actions["Move"].ReadValue<Vector2>();
 
             if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
@@ -60,12 +62,18 @@ public class Player2D : InPlayScript
                 velocity.y = jumpVelocity;
             }
 
-            float targetVelocityX = input.x * moveSpeed;
-            velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (!controller.collisions.below) ? accelerationTimeAirborne : (targetVelocityX == 0 ? decellerationTimeGrounded : accelerationTimeGrounded));
-            velocity.y += gravity * Time.deltaTime;
-            oldVelocity = velocity;
-            controller.Move(velocity * Time.deltaTime);
+            targetVelocityX = input.x * moveSpeed;
         }
+        else
+        {
+            targetVelocityX = 0;
+        }
+
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (!controller.collisions.below) ? accelerationTimeAirborne : (targetVelocityX == 0 ? decellerationTimeGrounded : accelerationTimeGrounded));
+        velocity.y += gravity * Time.deltaTime;
+        oldVelocity = velocity;
+        controller.Move(velocity * Time.deltaTime);
+        
     }
 }
 

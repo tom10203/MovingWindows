@@ -68,34 +68,27 @@ public class PlayerCharacter2D : MonoBehaviour
 
             if (hit)
             {
-                // Sawp positions then check for collisions
-
-                //if (portalManager.portalInfo.inPortal)
-                //{
-                //    portalManager.SwapPlayerPosition();
-                //    UpdateRaycastOrigins();
-                //    if (debugCheck >= 2)
-                //    {
-                //        Debug.Break();
-                //    }
-                //    HorizontalCollisions(ref velocity);
-
-                //    return;
-                //}
 
 
                 float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
 
-           
-                
-                velocity.x = (hit.distance - skinWidth) * directionX;
-                rayLength = hit.distance;
-                
-             
 
+                if (hit.collider.gameObject.tag == "MoveableObject" && collisions.isMovingObject)
+                {
+                    MoveableObject mo = hit.collider.transform.parent.GetComponent<MoveableObject>();
+                    if (mo != null)
+                    {
+                        mo.MoveTransform(new Vector2(hit.distance - skinWidth, 0));
+                    }
+                }
+                else
+                {
+                    velocity.x = (hit.distance - skinWidth) * directionX;
+                    rayLength = hit.distance;
 
-                collisions.left = directionX == -1;
-                collisions.right = directionX == 1;
+                    collisions.left = directionX == -1;
+                    collisions.right = directionX == 1;
+                }
                
             }
         }
@@ -125,6 +118,14 @@ public class PlayerCharacter2D : MonoBehaviour
                 if (Mathf.Abs(angle) > 1 && directionY == -1)
                 {
                     collisions.sliding = true;
+                }
+                else if (hit.collider.gameObject.tag == "MoveableObject" && collisions.isMovingObject)
+                {
+                    MoveableObject mo = hit.collider.transform.parent.GetComponent<MoveableObject>();
+                    if (mo != null)
+                    {
+                        mo.MoveTransform(new Vector2(0, hit.distance - skinWidth));
+                    }
                 }
                 else
                 {
@@ -237,6 +238,8 @@ public class PlayerCharacter2D : MonoBehaviour
 
         public float slopeAngle, slopeAngleOld;
         public Vector3 velocityOld;
+
+        public bool isMovingObject;
 
         public void Reset()
         {

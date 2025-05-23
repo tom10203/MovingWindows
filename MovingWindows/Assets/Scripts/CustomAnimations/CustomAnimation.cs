@@ -19,21 +19,18 @@ public class CustomAnimation : MonoBehaviour
         
         if (other.gameObject.layer == 3)
         {
-            Debug.Log($"Player triggered animation");
             PlayAnimation();
         }
     }
     
     protected virtual void PlayAnimation()
     {
-        Debug.Log($"PlayAnimation CUstom animation");
         gameStateManager.gameState = GameStateManager.GameState.inAnimation;
         gameStateManager.ToggleScripts();
     }
 
     protected void EndAnimation()
     {
-        Debug.Log($"End of animation");
         gameStateManager.gameState = GameStateManager.GameState.inPlay;
         Destroy(gameObject);
         gameStateManager.ToggleScripts();

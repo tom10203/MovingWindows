@@ -103,6 +103,10 @@ public class PortalManager : InPlayScript
                 }
 
             }
+            else if (noOfPortalsInScene == 1)
+            {
+                SwapTextureSinglePortal();
+            }
             else
             {
                 setTextureCamPos = true;
@@ -403,6 +407,18 @@ public class PortalManager : InPlayScript
         portals[0].GetComponent<Renderer>().material.SetVector("_Offset", -offset + camTransformOffset);
         portals[1].GetComponent<Renderer>().material.SetVector("_Offset", offset  + camTransformOffset);
         
+    }
+
+    void SwapTextureSinglePortal()
+    {
+
+        Vector3 camSpace1 = cam.WorldToViewportPoint(cam.transform.position);
+        Vector3 camSpace2 = cam.WorldToViewportPoint(textureCam.transform.position);
+
+
+        Vector3 camTransformOffset = camSpace1 - camSpace2;
+
+        portals[0].GetComponent<Renderer>().material.SetVector("_Offset", camTransformOffset);
     }
 
     bool CheckBounds(Transform portal, BoxCollider2D playerCollider)

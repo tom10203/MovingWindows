@@ -38,7 +38,6 @@ public class GameStateManager : MonoBehaviour
         // Player
         // Portal
 
-        Debug.Log($"Changing state");
 
         foreach (var script in scripts)
         {
