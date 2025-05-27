@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,6 +15,10 @@ public class MoveableObject : InteractableObject
     [SerializeField] Player2D player;
     [SerializeField] PlayerCharacter2D playerCharacter2D;
 
+    [SerializeField] GameObject lineRenderer1;
+    [SerializeField] GameObject lineRenderer2;
+    [SerializeField] float maxAlpha = 0.67f;
+
     float targetVelocityX;
     float targetVelocityY;
 
@@ -21,6 +26,8 @@ public class MoveableObject : InteractableObject
 
     float velX;
     float velY;
+
+    bool lineRendererActive;
 
     Vector2 vel;
 
@@ -40,48 +47,53 @@ public class MoveableObject : InteractableObject
             if (input.actions["Interact"].WasPressedThisFrame())
             {
                 isMoving = !isMoving;
-                //rb.simulated = false;
+                if (!lineRenderer1.activeSelf) lineRenderer1.SetActive(true);
+                if (!lineRenderer2.activeSelf) lineRenderer2.SetActive(true);
+
+                StartCoroutine(ChangeAlpha());
                 offset = transform.position - player.transform.position + Vector3.up * offsetAmount;
             }
         }
 
-        //if (isMoving)
-        //{
-        //    if (offsetTransform)
-        //    {
-        //        offsetTransform = false;
-        //        offset = transform.position - player.transform.position;
-        //        rb.gravityScale = 0;
 
-        //        rb.linearVelocity += Vector2.up * offsetAmount;
-        //    }
+    }
 
-        //    //transform.position = player.transform.position + (Vector3)offset;
+    IEnumerator ChangeAlpha()
+    {
+        float startAlpha  = isMoving ? 0 : maxAlpha;
+        float targetAlpha = isMoving ? maxAlpha : 0;
+        float t = 0;
 
-        //    if (player.controller.collisions.above || player.controller.collisions.below)
-        //    {
-        //        playerVelocityY = 0f;
-        //    }
-        //    else
-        //    {
-        //        playerVelocityY = player.velocity.y;
-        //    }
+        while (t < 0.5f)
+        {
+            t += Time.deltaTime / 0.5f;
+            float alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
+            SetAlpha(alpha);
+            yield return null;
+        }
 
+        SetAlpha(targetAlpha);
 
-        //    //targetVelocityY = Mathf.SmoothDamp(rb.linearVelocity.y, playerVelocityY, ref velY, 0.1f);
-        //    //targetVelocityX = Mathf.SmoothDamp(rb.linearVelocity.x, player.velocity.x, ref velX, 0.1f);
+        if (!isMoving)
+        {
+            ToggleLineRenderer();
+        }
 
+    }
 
-        //    //rb.linearVelocity = new Vector2(targetVelocityX, targetVelocityY);
+    void SetAlpha(float alpha)
+    {
+        Material mat1 = lineRenderer1.GetComponent<LineRenderer>().material;
+        Material mat2 = lineRenderer2.GetComponent<LineRenderer>().material;
 
-        //    rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, player.velocity, ref vel, 0.1f);
-        //}
-        //else
-        //{
-        //    rb.gravityScale = 1;
-        //    offsetTransform = true;
-        //}
+        mat1.SetFloat("_Alpha", alpha);
+        mat2.SetFloat("_Alpha", alpha);
+    }
 
+    void ToggleLineRenderer()
+    {
+        lineRenderer1.SetActive(!lineRenderer1);
+        lineRenderer2.SetActive(!lineRenderer2);
     }
 
     void FixedUpdate()

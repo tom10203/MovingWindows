@@ -80,6 +80,10 @@ public class PlayerCharacter2D : MonoBehaviour
                     {
                         mo.MoveTransform(new Vector2(hit.distance - skinWidth, 0));
                     }
+                    else
+                    {
+                        Debug.Log($"MoveableObject script is Not found");
+                    }
                 }
                 else
                 {

@@ -49,18 +49,23 @@ public class PerspectiveCameraMovementTest : MonoBehaviour
             Camera camera = perspectiveCameras[i];
             float moveAmount = cameraMoveAmount1 - cameraMoveDifference * i;
             camera.transform.Translate(moveAmount * movement);
+
+            Vector3 offset = camera.transform.position - transform.position;
+
+            Camera textureCam = textureCams[i];
+            textureCam.transform.position = textureCamMain.transform.position + offset;
             //SetSize(camera, maxSize);   
 
         }
 
-        for (int i = 0; i < textureCams.Length; i++)
-        {
-            Camera camera = textureCams[i];
-            float moveAmount = cameraMoveAmount1 - cameraMoveDifference * i;
-            camera.transform.Translate(moveAmount * movement);
-            //SetSize(camera, maxSize);   
+        //for (int i = 0; i < textureCams.Length; i++)
+        //{
+        //    Camera camera = textureCams[i];
+        //    float moveAmount = cameraMoveAmount1 - cameraMoveDifference * i;
+        //    camera.transform.Translate(moveAmount * movement);
+        //    //SetSize(camera, maxSize);   
 
-        }
+        //}
 
         foreach (var camera in staticCameras)
         {
@@ -73,5 +78,7 @@ public class PerspectiveCameraMovementTest : MonoBehaviour
     {
         cam.orthographicSize = size;
     }
+
+
 
 }
