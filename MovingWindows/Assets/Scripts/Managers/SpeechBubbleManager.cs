@@ -1,7 +1,8 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class SpeechBubbleManager : MonoBehaviour
+public class SpeechBubbleManager : CustomAnimation
 {
     [SerializeField] SpeachBubble mageSpeechBubble;
     [SerializeField] SpeachBubble wizardSpeechBubble;
@@ -9,13 +10,19 @@ public class SpeechBubbleManager : MonoBehaviour
     [SerializeField] PlayerInput input;
     [SerializeField] bool mageSpeaking = true;
 
-    [SerializeField] GameStateManager gameStateManager;
 
-    public bool disableMage;
-    public bool disableWizard;
+    public bool endInteraction;
+    public bool isInteracting;
 
     private void Start()
     {
+        isInteracting = true;
+    }
+
+    protected override void PlayAnimation()
+    {
+        base.PlayAnimation();
+
         if (mageSpeaking)
         {
             mageSpeechBubble.gameObject.SetActive(true);
@@ -27,55 +34,58 @@ public class SpeechBubbleManager : MonoBehaviour
             wizardSpeechBubble.WriteTextLine();
         }
 
+        StartCoroutine(Interact());
+
 
     }
-
-    void Update()
+    IEnumerator Interact()
     {
-        if (input.actions["Attack"].WasPressedThisFrame())
+        while (isInteracting)
         {
-
-            if (mageSpeechBubble.gameObject && wizardSpeechBubble.gameObject && mageSpeechBubble.finished && wizardSpeechBubble.finished)
+            if (input.actions["Attack"].WasPressedThisFrame())
             {
-                gameStateManager.ToggleScripts();
-                Destroy(mageSpeechBubble.gameObject);
-                Destroy(wizardSpeechBubble.gameObject);
-                Destroy(gameObject);
-            }
 
 
-            if (mageSpeaking)
-            {
-                mageSpeechBubble.gameObject.SetActive (true);
-                mageSpeechBubble.EnableSR();
-
-                if (wizardSpeechBubble.disable)
+                if (endInteraction)
                 {
-                    wizardSpeechBubble.DisableSR();
+                    isInteracting = false;
+                    EndAnimation();
+                    yield break;
+
                 }
 
-                if (mageSpeechBubble.gameObject)
+
+                if (mageSpeaking)
                 {
+                    mageSpeechBubble.gameObject.SetActive(true);
+                    mageSpeechBubble.EnableSR();
+
+                    if (wizardSpeechBubble.disable)
+                    {
+                        wizardSpeechBubble.DisableSR();
+                    }
+
                     mageSpeechBubble.WriteTextLine();
-                }
-            }
-            else
-            {
-                wizardSpeechBubble.gameObject.SetActive(true);
-                wizardSpeechBubble.EnableSR();
 
-                if (mageSpeechBubble.disable)
-                {
-                    mageSpeechBubble.DisableSR();
                 }
-
-                if (wizardSpeechBubble.gameObject)
+                else
                 {
+                    wizardSpeechBubble.gameObject.SetActive(true);
+                    wizardSpeechBubble.EnableSR();
+
+                    if (mageSpeechBubble.disable)
+                    {
+                        mageSpeechBubble.DisableSR();
+                    }
+
                     wizardSpeechBubble.WriteTextLine();
+
                 }
+
+
             }
 
-            
+            yield return null;
         }
     }
 
@@ -88,5 +98,12 @@ public class SpeechBubbleManager : MonoBehaviour
     {
         mageSpeechBubble.gameObject.SetActive(!mageSpeechBubble.gameObject);
         wizardSpeechBubble.gameObject.SetActive(!wizardSpeechBubble.gameObject);
+    }
+
+    public void EndInteraction()
+    {
+        mageSpeechBubble.gameObject.SetActive(false);
+        wizardSpeechBubble.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 }

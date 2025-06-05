@@ -19,7 +19,7 @@ TagManager:
   - Foreground
   - Bloom
   - Bloom-Moss
-  - CameraObstacle
+  - InteractableObjectChild
   - InteractableObjects
   - 
   - 

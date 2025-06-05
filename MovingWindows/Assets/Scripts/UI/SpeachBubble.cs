@@ -8,6 +8,7 @@ public class DialogueLine
     [TextArea(2, 5)] public string text;
     public bool isEndOfSentence;
     public bool disableSpeechBubble;
+    public bool endOfInteraction;
 }
 
 public class SpeachBubble : MonoBehaviour
@@ -51,23 +52,6 @@ public class SpeachBubble : MonoBehaviour
         }
     }
 
-    //private IEnumerator TypeLine(DialogueLine line)
-    //{
-    //    isWritingText = true;
-    //    currentText = "";
-    //    displayText.text = "";
-
-    //    foreach (char c in line.text)
-    //    {
-    //        currentText += c;
-    //        displayText.text = currentText;
-    //        yield return new WaitForSeconds(delay);
-    //    }
-
-    //    isWritingText = false;
-    //    OnLineFinished();
-    //}
-
 
     private IEnumerator TypeLine(DialogueLine line)
     {
@@ -107,6 +91,11 @@ public class SpeachBubble : MonoBehaviour
     private void OnLineFinished()
     {
         // Notify manager if it's the end of a speech block
+        if (textLines[currentLineIndex].endOfInteraction)
+        {
+            speechBubbleManager.endInteraction = true;
+        }
+
         if (textLines[currentLineIndex].isEndOfSentence)
         {
             speechBubbleManager.ToggleSpeechBubble();

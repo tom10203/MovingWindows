@@ -13,38 +13,20 @@ public class GameStateManager : MonoBehaviour
         oldState = gameState;
     }
 
-    //private void Update()
-    //{
-
-
-    //    if (oldState != gameState)
-    //    {
-    //        Debug.Log($"Changing state");
-    //        ToggleScripts();
-    //    }
-
-
-    //    oldState = gameState;
-    //}
     public enum GameState
     {
         inPlay,
         inAnimation
     }
 
-    public void ToggleScripts()
+    public void ToggleScripts(bool active, bool ignoreCamera)
     {
-        // Camera
-        // Player
-        // Portal
-
 
         foreach (var script in scripts)
         {
-            script.inPlay = !script.inPlay;
+            if (ignoreCamera && script.GetType() == typeof(CameraFollow)) continue;
+            script.inPlay = active;
         }
-
-       
 
     }
 

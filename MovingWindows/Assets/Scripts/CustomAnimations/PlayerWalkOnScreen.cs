@@ -7,7 +7,6 @@ public class PlayerWalkOnScreen : CustomAnimation
     [SerializeField] Transform player;
     [SerializeField] Animator playerAnimator;
     [SerializeField] float distanceToMove;
-    [SerializeField] SpeechBubbleManager speechBubbleManager;
 
     protected override void PlayAnimation()
     {
@@ -28,8 +27,7 @@ public class PlayerWalkOnScreen : CustomAnimation
             yield return null;
         }
 
-        //EndAnimation();
         playerAnimator.SetInteger("State", 0);
-        speechBubbleManager.gameObject.SetActive(true);
+        EndAnimation();
     }
 }

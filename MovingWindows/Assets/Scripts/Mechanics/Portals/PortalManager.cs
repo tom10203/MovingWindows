@@ -94,6 +94,7 @@ public class PortalManager : InPlayScript
                     if (swapPositions)
                     {
                         SwapPlayerPosition();
+                        // Drop all carying items
                         swapPositions = false;
                     }
                 }
