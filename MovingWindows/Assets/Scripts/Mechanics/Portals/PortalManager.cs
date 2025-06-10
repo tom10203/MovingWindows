@@ -79,7 +79,9 @@ public class PortalManager : InPlayScript
                     SetTextureCamPosition();
                 }
 
-                SwapTextures();
+                bool flipTexture = ((portalInfo.portalANormal == portalInfo.portalBNormal) && (portalInfo.portalANormal == Vector2.right || portalInfo.portalANormal == Vector2.left)) ? true : false;
+
+                SwapTextures(flipTexture);
 
                 CheckPortals();
 
@@ -93,7 +95,15 @@ public class PortalManager : InPlayScript
                 {
                     if (swapPositions)
                     {
-                        SwapPlayerPosition();
+                        if ((portalInfo.portalANormal == portalInfo.portalBNormal) && (portalInfo.portalANormal == Vector2.right || portalInfo.portalANormal == Vector2.left))
+                        {
+                            player.GetComponent<Player2D>().InvertControls();
+                            SwapPlayerPosition(true);
+                        }
+                        else
+                        {
+                            SwapPlayerPosition(false);
+                        }
                         // Drop all carying items
                         swapPositions = false;
                     }
@@ -213,7 +223,7 @@ public class PortalManager : InPlayScript
             portalPosition = AdjustPosition(portalPosition, hitNormal);
             portalPosition += CheckForLedge(portalPosition, hitNormal);
 
-            InstantiatePortal(portalPosition);
+            InstantiatePortal(portalPosition, hitNormal);
         }
 
     }
@@ -340,7 +350,7 @@ public class PortalManager : InPlayScript
         return Vector3.zero;
     }
 
-    void InstantiatePortal(Vector3 startPos)
+    void InstantiatePortal(Vector3 startPos, Vector3 normal)
     {
         
         GameObject newPortal = Instantiate(portalPrefab, startPos, Quaternion.Euler(-90,0,0), transform);
@@ -354,7 +364,11 @@ public class PortalManager : InPlayScript
 
         portals[noOfPortalsInScene] = newPortal;
 
+        if (noOfPortalsInScene == 0) portalInfo.portalANormal = normal;
+        if (noOfPortalsInScene == 1) portalInfo.portalBNormal = normal;
         noOfPortalsInScene++;
+
+        
     }
 
     void ResetPortals()
@@ -393,7 +407,7 @@ public class PortalManager : InPlayScript
         spellCast.moveSpeed = spellCast.moveSpeed * 1.5f;
     }
 
-    void SwapTextures()
+    void SwapTextures(bool flipTexture)
     {
         Vector3 screenSpace1 = cam.WorldToViewportPoint(portals[0].transform.position);
         Vector3 screenSpace2 = cam.WorldToViewportPoint(portals[1].transform.position);
@@ -407,7 +421,10 @@ public class PortalManager : InPlayScript
 
         portals[0].GetComponent<Renderer>().material.SetVector("_Offset", -offset + camTransformOffset);
         portals[1].GetComponent<Renderer>().material.SetVector("_Offset", offset  + camTransformOffset);
-        
+
+        portals[0].GetComponent<Renderer>().material.SetFloat("_Flip", flipTexture ? 1 : 0);
+        portals[1].GetComponent<Renderer>().material.SetFloat("_Flip", flipTexture ? 1 : 0);
+
     }
 
     void SwapTextureSinglePortal()
@@ -438,10 +455,6 @@ public class PortalManager : InPlayScript
     }
 
 
-    Vector3 CalculateOffset()
-    {
-        return (portalInfo.targetPortal.position - portalInfo.currentPortal.position);
-    }
 
     bool CheckBoundsTest(Transform portal, BoxCollider2D playerCollider)
     {
@@ -477,12 +490,17 @@ public class PortalManager : InPlayScript
         }
     }
 
-    public void SwapPlayerPosition()
+    public void SwapPlayerPosition(bool flipPosition)
     {
         Transform currentPortal = portalInfo.currentPortal;
         Transform targetPortal = portalInfo.targetPortal;
 
         Vector3 offset = targetPortal.position - currentPortal.position;
+
+        Vector3 flipOffset = currentPortal.position - player.position;
+
+        if (flipPosition) offset += flipOffset;
+
         player.position = player.position + offset;
     }
 
@@ -495,6 +513,8 @@ public class PortalManager : InPlayScript
         public float minY, maxY;
         public Vector2 centre;
         public Bounds portalBounds;
+        public Vector2 portalANormal;
+        public Vector2 portalBNormal;
 
         public void Reset()
         {

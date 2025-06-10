@@ -30,14 +30,16 @@ public class PlayerCharacter2D : MonoBehaviour
         CalculateRaySpacing();
     }
 
-    public void Move(Vector3 velocity)
+    public void Move(Vector3 velocity, bool standingOnPlatform = false)
     {
         UpdateRaycastOrigins();
         collisions.Reset();
         collisions.velocityOld = velocity;
 
-        debugCheck = 0;
-
+        if (velocity.y < 0)
+        {
+            DescendSlope(ref velocity);
+        }
         if (velocity.x != 0)
         {
             HorizontalCollisions(ref velocity);
@@ -47,8 +49,12 @@ public class PlayerCharacter2D : MonoBehaviour
             VerticalCollisions(ref velocity);
         }
 
-
         transform.Translate(velocity);
+
+        if (standingOnPlatform)
+        {
+            collisions.below = true;
+        }
     }
 
     void HorizontalCollisions(ref Vector3 velocity)
@@ -148,7 +154,7 @@ public class PlayerCharacter2D : MonoBehaviour
             if (angle == 0f)
             {
                 Debug.Log($"PLayer is sliding AND angle == 0");
-                Debug.Break();
+                //Debug.Break();
             }
             
             velocity.y = -absoluteYVelocity * Mathf.Sin(angle * Mathf.Deg2Rad);

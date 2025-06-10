@@ -25,6 +25,10 @@ public class Player2D : InPlayScript
 
     [SerializeField] TimeLineManager timeLineManager;
 
+    public InputInfo inputInfo;
+
+    Vector2 input;
+
     void Start()
     {
         controller = GetComponent<PlayerCharacter2D>();
@@ -36,7 +40,7 @@ public class Player2D : InPlayScript
 
     void Update()
     {
-     
+
         if (controller.collisions.sliding)
         {
             velocity.y = oldVelocity.y;
@@ -53,9 +57,10 @@ public class Player2D : InPlayScript
         }
 
         float targetVelocityX;
+
         if (inPlay)
         {
-            Vector2 input = playerInput.actions["Move"].ReadValue<Vector2>();
+            input = playerInput.actions["Move"].ReadValue<Vector2>();
 
             if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
             {
@@ -69,11 +74,37 @@ public class Player2D : InPlayScript
             targetVelocityX = 0;
         }
 
+        if ((inputInfo.inverted && Mathf.Sign(input.x) != inputInfo.direction) || input.x == 0)
+        {
+            inputInfo.inverted = false;
+        }
+
+        if (inputInfo.inverted)
+        {
+            targetVelocityX *= -1f;
+        }
+       
+
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (!controller.collisions.below) ? accelerationTimeAirborne : (targetVelocityX == 0 ? decellerationTimeGrounded : accelerationTimeGrounded));
+
         velocity.y += gravity * Time.deltaTime;
         oldVelocity = velocity;
         controller.Move(velocity * Time.deltaTime);
         
+    }
+
+    public void InvertControls()
+    {
+        inputInfo.inverted = true;
+        inputInfo.direction = Mathf.Sign(input.x);
+        velocityXSmoothing *= -1f;
+        velocity.x *= -1f;
+    }
+
+    public struct InputInfo
+    {
+        public bool inverted;
+        public float direction;
     }
 }
 

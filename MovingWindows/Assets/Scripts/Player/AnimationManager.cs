@@ -33,12 +33,14 @@ public class AnimationManager : InPlayScript
             Vector3 playerVelocity = player.velocity;
             CollisionInfo collisionInfo = player.controller.collisions;
 
+            float playerVelocityX = playerVelocity.x;
 
             Vector2 moveInputValue = input.actions["Move"].ReadValue<Vector2>();
             float xDir = moveInputValue.x;
 
             // check to see if direction of left/right movement changed -> rotate player to look direction if so
-            lookDirection = (xDir == 0 ? lookDirection : (xDir < 0 ? -1 : 1));
+            lookDirection = (playerVelocityX == 0 ? lookDirection : (playerVelocityX < 0 ? -1 : 1));
+            
             playerSprite.transform.eulerAngles = lookDirection > 0 ? new Vector3(0, 0, 0) : new Vector3(0, 180, 0);
 
             if (input.actions["Move"].IsPressed() && collisionInfo.below)
